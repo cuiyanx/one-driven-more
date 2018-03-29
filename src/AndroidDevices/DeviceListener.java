@@ -1,103 +1,58 @@
 package AndroidDevices;
 
 import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.BufferedWriter;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 
 public class DeviceListener {
 
-	private static Process process;
-	private String cmdStr;
-	public String strCommands;
+    public DeviceListener() {
+    }
 
-	public DeviceListener(String SN) {
-		StaticData.setListenerSN(SN);
-	}
+    public void init() {
+        System.out.println("Scan android devices....\n");
 
-	public void Start() {
-		System.out.println("Start to listen: " + StaticData.ListenerSN);
+        StaticData.DeviceResolutionX = new int[StaticData.DeviceSNList.length];
+        StaticData.DeviceResolutionY = new int[StaticData.DeviceSNList.length];
+        StaticData.DeviceProcess = new Process[StaticData.DeviceSNList.length];
+        StaticData.DeviceBW = new BufferedWriter[StaticData.DeviceSNList.length];
+        StaticData.DeviceBR = new BufferedReader[StaticData.DeviceSNList.length];
+        StaticData.DeviceListenerThread = new DeviceListenerThread[StaticData.DeviceSNList.length];
+        DeviceParameters DPs = new DeviceParameters();
 
-		this.cmdStr = "adb -s " + StaticData.ListenerSN + " shell getevent -l";
+        for (int i = 0; i < StaticData.DeviceSNList.length; i++) {
+            System.out.println("SN[" + i + "]: " + StaticData.DeviceSNList[i]);
 
-		try {
-			process = Runtime.getRuntime().exec(this.cmdStr);
-		} catch (IOException e) {
-			System.err.println("Create process error...\n" + e);
-			System.exit(1);
-		}
+            String cmdStr = "adb -s " + StaticData.DeviceSNList[i] + " shell";
+            try {
+                StaticData.DeviceProcess[i] = Runtime.getRuntime().exec(cmdStr);
+                StaticData.DeviceBW[i] = new BufferedWriter(new OutputStreamWriter(StaticData.DeviceProcess[i].getOutputStream()));
+                StaticData.DeviceBR[i] = new BufferedReader(new InputStreamReader(StaticData.DeviceProcess[i].getInputStream()));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
-		InputStream inStreams = process.getInputStream();
-		BufferedReader br = new BufferedReader(new InputStreamReader(inStreams));
-		DataHanding DataHanding = new DataHanding();
+            int[] XYer = DPs.getDeviceResolution(i);
+            StaticData.DeviceResolutionX[i] = XYer[0];
+            StaticData.DeviceResolutionY[i] = XYer[1];
+            System.out.println("    Resolution[" + i + "]: " + XYer[0] + "*" + XYer[1]);
 
-		try {
-			while ((this.strCommands = br.readLine()) != null) {
-				String[] strCommandsArray = this.strCommands.split("\\s+");
-				String type = null;
-				String code = null;
-				String value = null;
+            int[] LWer = DPs.getDeviceLW(i);
+            System.out.println("    LW[" + i + "]: " + LWer[0] + "*" + LWer[1]);
 
-				if (strCommandsArray.length > 3) {
-					if (strCommandsArray[1].equals("EV_ABS") && strCommandsArray[2].equals("ABS_MT_TRACKING_ID")) {
-						type = strCommandsArray[1];
-						code = strCommandsArray[2];
-						value = strCommandsArray[3];
-					}
+            int[] Version = DPs.getDeviceVersion(i);
+            System.out.println("    Version[" + i + "]: " + Version[0] + "." + Version[1] + "." + Version[2] + "\n");
+        }
+    }
 
-					if (strCommandsArray[1].equals("EV_ABS") && strCommandsArray[2].equals("ABS_MT_POSITION_X")) {
-						type = strCommandsArray[1];
-						code = strCommandsArray[2];
-						value = strCommandsArray[3];
-					}
+    public void StartListening() {
+        System.out.println("Start to listen android devices....");
 
-					if (strCommandsArray[1].equals("EV_ABS") && strCommandsArray[2].equals("ABS_MT_POSITION_Y")) {
-						type = strCommandsArray[1];
-						code = strCommandsArray[2];
-						value = strCommandsArray[3];
-					}
-
-					if (strCommandsArray[1].equals("EV_KEY") && strCommandsArray[2].equals("BTN_TOUCH")) {
-						type = strCommandsArray[1];
-						code = strCommandsArray[2];
-						value = strCommandsArray[3];
-					}
-
-					if (strCommandsArray[1].equals("EV_KEY") && strCommandsArray[2].equals("KEY_BACK")) {
-						type = strCommandsArray[1];
-						code = strCommandsArray[2];
-						value = strCommandsArray[3];
-					}
-
-					if (strCommandsArray[1].equals("EV_KEY") && (strCommandsArray[2].equals("KEY_MENU") || strCommandsArray[2].equals("00fe"))) {
-						type = strCommandsArray[1];
-						code = strCommandsArray[2];
-						value = strCommandsArray[3];
-					}
-
-					if (strCommandsArray[1].equals("EV_KEY") && (strCommandsArray[2].equals("KEY_HOME") || strCommandsArray[2].equals("KEY_HOMEPAGE"))) {
-						type = strCommandsArray[1];
-						code = strCommandsArray[2];
-						value = strCommandsArray[3];
-					}
-
-					if ((type != null) && (code != null) && (value != null)) {
-						DataHanding.ProcessingData(type, code, value);
-					}
-				}
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-		process.destroy();
-
-		try {
-			process.waitFor();
-		} catch (InterruptedException e) {
-		}
-
-		System.exit(0);
-	}
+        for (int i = 0; i < StaticData.DeviceSNList.length; i++) {
+            StaticData.DeviceListenerThread[i] = new DeviceListenerThread(StaticData.DeviceSNList[i]);
+            StaticData.DeviceListenerThread[i].start();
+        }
+    }
 
 }

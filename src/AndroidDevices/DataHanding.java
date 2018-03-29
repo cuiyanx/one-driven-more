@@ -2,167 +2,158 @@ package AndroidDevices;
 
 public class DataHanding {
 
-	private String type;
-	private String code;
-	private String value;
-	private String Xtemp;
-	private String Ytemp;
-	private boolean Touchflag = false;
+    private DeviceEvents DeviceEvents;
+    private String SN;
+    private String Xtemp;
+    private String Ytemp;
+    private boolean Touchflag = false;
 
-	public DataHanding() {
-	}
+    public DataHanding(String SN) {
+        DeviceEvents = new DeviceEvents();
+        this.SN = SN;
+    }
 
-	private void InitPointXY() {
-		if (this.Touchflag == false) {
-			StaticData.keyXs = null;
-			StaticData.keyYs = null;
-			StaticData.keyXe = null;
-			StaticData.keyYe = null;
-			this.Touchflag = true;
-		}
-	}
+    private void InitPointXY() {
+        if (this.Touchflag == false) {
+            StaticData.keyXs = null;
+            StaticData.keyYs = null;
+            StaticData.keyXe = null;
+            StaticData.keyYe = null;
+            this.Touchflag = true;
+        }
+    }
 
-	private void CopyScreenOperation() {			
-		if (StaticData.keyXs != null && StaticData.keyYs != null) {
-			if (StaticData.keyXe == null || StaticData.keyYe == null) {
-				StaticData.keyXe = StaticData.keyXs;
-				StaticData.keyYe = StaticData.keyYs;
-			}
+    private void CopyScreenOperation() {
+        if (StaticData.keyXs != null && StaticData.keyYs != null) {
+            if (StaticData.keyXe == null || StaticData.keyYe == null) {
+                StaticData.keyXe = StaticData.keyXs;
+                StaticData.keyYe = StaticData.keyYs;
+            }
 
-			int Xs = Integer.parseInt(StaticData.keyXs, 16);
-			int Xe = Integer.parseInt(StaticData.keyXe, 16);
-			int Ys = Integer.parseInt(StaticData.keyYs, 16);
-			int Ye = Integer.parseInt(StaticData.keyYe, 16);
+            int Xs = Integer.parseInt(StaticData.keyXs, 16);
+            int Xe = Integer.parseInt(StaticData.keyXe, 16);
+            int Ys = Integer.parseInt(StaticData.keyYs, 16);
+            int Ye = Integer.parseInt(StaticData.keyYe, 16);
+            float RatioXs = StaticData.getRatioX(this.SN, Xs);
+            float RatioYs = StaticData.getRatioY(this.SN, Ys);
+            float RatioXe = StaticData.getRatioX(this.SN, Xe);
+            float RatioYe = StaticData.getRatioY(this.SN, Ye);
 
-			System.out.println("Listener:");
-			System.out.println("    [" + Xs + ", " + Ys + "] -> [" + Xe + ", " + Ye + "]");
+            System.out.println("\n" + this.SN + ":");
+            System.out.println("    [" + Xs + ", " + Ys + "] -> [" + Xe + ", " + Ye + "]");
 
-			for (int i = 0; i < StaticData.PhoneSNList.length; i++) {
-				if (!StaticData.PhoneSNList[i].equals(StaticData.ListenerSN)) {
-					int XR = StaticData.getResolutionX(StaticData.PhoneSNList[i]);
-					int YR = StaticData.getResolutionY(StaticData.PhoneSNList[i]);
-					
-					if (((Xs - 10) <= Xe && Xe <= (Xs + 10)) && ((Ys - 10) <= Ye && Ye <= (Ys + 10))) {
-						StaticData.setListenerRatioX(Xs);
-						StaticData.setListenerRatioY(Ys);
-						StaticData.keyXs = Integer.toString((int)(XR * StaticData.ListenerRatioX));
-						StaticData.keyYs = Integer.toString((int)(YR * StaticData.ListenerRatioY));
+            for (int i = 0; i < StaticData.DeviceSNList.length; i++) {
+                if (!StaticData.DeviceSNList[i].equals(this.SN)) {
+                    int ResolutionX = StaticData.DeviceResolutionX[i];
+                    int ResolutionY = StaticData.DeviceResolutionY[i];
+                    int count = i;
 
-						DeviceEvents DeviceEvents = new DeviceEvents(StaticData.PhoneSNList[i]);
-						DeviceEvents.ScreenTap(StaticData.keyXs, StaticData.keyYs);
-					} else {
-						StaticData.setListenerRatioX(Xs);
-						StaticData.setListenerRatioY(Ys);
-						StaticData.keyXs = Integer.toString((int)(XR * StaticData.ListenerRatioX));
-						StaticData.keyYs = Integer.toString((int)(YR * StaticData.ListenerRatioY));
-						StaticData.setListenerRatioX(Xe);
-						StaticData.setListenerRatioY(Ye);
-						StaticData.keyXe = Integer.toString((int)(XR * StaticData.ListenerRatioX));
-						StaticData.keyYe = Integer.toString((int)(YR * StaticData.ListenerRatioY));
+                    if (((Xs - 10) <= Xe && Xe <= (Xs + 10)) && ((Ys - 10) <= Ye && Ye <= (Ys + 10))) {
+                        StaticData.keyXs = Integer.toString((int) (ResolutionX * RatioXs));
+                        StaticData.keyYs = Integer.toString((int) (ResolutionY * RatioYs));
 
-						DeviceEvents DeviceEvents = new DeviceEvents(StaticData.PhoneSNList[i]);
-						DeviceEvents.ScreenSwipe(StaticData.keyXs, StaticData.keyYs, StaticData.keyXe, StaticData.keyYe);
-					}
-				}
-			}
-			
-			System.out.println("");
-		}
-	}
+                        new Thread() {
+                            public void run() {
+                                DeviceEvents.ScreenTap(count, StaticData.keyXs, StaticData.keyYs);
+                            }
+                        }.start();
+                    } else {
+                        StaticData.keyXs = Integer.toString((int) (ResolutionX * RatioXs));
+                        StaticData.keyYs = Integer.toString((int) (ResolutionY * RatioYs));
+                        StaticData.keyXe = Integer.toString((int) (ResolutionX * RatioXe));
+                        StaticData.keyYe = Integer.toString((int) (ResolutionY * RatioYe));
 
-	private void CopyKeyOperation(String code) {
-		this.code = code;
-		String keyWord = null;
+                        new Thread() {
+                            public void run() {
+                                DeviceEvents.ScreenSwipe(count, StaticData.keyXs, StaticData.keyYs, StaticData.keyXe, StaticData.keyYe);
+                            }
+                        }.start();
+                    }
+                }
+            }
+        }
+    }
 
-		if (this.code.equals("KEY_BACK"))
-			keyWord = "KeyBack";
+    private void CopyKeyOperation(String code) {
+        if (code.equals("KEY_BACK"))
+            StaticData.keyWord = "KeyBack";
+        else if (code.equals("KEY_MENU") || code.equals("00fe"))
+            StaticData.keyWord = "keyMenu";
+        else if (code.equals("KEY_HOME") || code.equals("KEY_HOMEPAGE"))
+            StaticData.keyWord = "keyHome";
+        else if (code.equals("KEY_POWER"))
+            StaticData.keyWord = "keyPower";
+        else if (code.equals("KEY_VOLUMEDOWN"))
+            StaticData.keyWord = "keyVolumeDown";
+        else if (code.equals("KEY_VOLUMEUP"))
+            StaticData.keyWord = "keyVolumeUp";
 
-		if (this.code.equals("KEY_MENU") || this.code.equals("00fe"))
-			keyWord = "keyMenu";
+        System.out.println("\n" + this.SN + ":");
+        System.out.println("    KeyWord: " + StaticData.keyWord);
 
-		if (this.code.equals("KEY_HOME") || this.code.equals("KEY_HOMEPAGE"))
-			keyWord = "keyHome";
+        for (int i = 0; i < StaticData.DeviceSNList.length; i++) {
+            if (!StaticData.DeviceSNList[i].equals(this.SN)) {
+                int count = i;
 
-		System.out.println("Listener:");
-		System.out.println("    KeyWord: " + keyWord);
+                new Thread() {
+                    public void run() {
+                        DeviceEvents.KeyPress(count, StaticData.keyWord);
+                    }
+                }.start();
+            }
+        }
+    }
 
-		for (int i = 0; i < StaticData.PhoneSNList.length; i++) {
-			if (!StaticData.PhoneSNList[i].equals(StaticData.ListenerSN)) {
-				DeviceEvents DeviceEvents = new DeviceEvents(StaticData.PhoneSNList[i]);
+    public void ProcessingData(String type, String code, String value) {
+        if ((type.equals("EV_ABS") && code.equals("ABS_MT_TRACKING_ID")) || (type.equals("EV_KEY") && code.equals("BTN_TOUCH"))) {
+            if ((value.equals("ffffffff")) || (value.equals("UP"))) {
+                if (this.Touchflag == true) {
+                    this.Touchflag = false;
 
-				if (StaticData.PhoneSNList[i].equals("33004ba0a76db253")) {
-					DeviceEvents.KeyPressUser(keyWord);
+                    if ((StaticData.keyXs == null) || (StaticData.keyYs == null)) {
+                        StaticData.keyXs = this.Xtemp;
+                        StaticData.keyYs = this.Ytemp;
+                    }
 
-					return;
-				}
+                    CopyScreenOperation();
+                }
+            } else {
+                InitPointXY();
+            }
+        }
 
-				DeviceEvents.KeyPress(keyWord);
-			}
-		}
+        if (this.Touchflag == true) {
+            if (type.equals("EV_ABS") && code.equals("ABS_MT_POSITION_X")) {
+                if (StaticData.keyXs == null) {
+                    StaticData.keyXs = value;
+                } else {
+                    StaticData.keyXe = value;
+                }
+            }
 
-		System.out.println("");
-	}
+            if (type.equals("EV_ABS") && code.equals("ABS_MT_POSITION_Y")) {
+                if (StaticData.keyYs == null) {
+                    StaticData.keyYs = value;
+                } else {
+                    StaticData.keyYe = value;
+                }
+            }
+        } else {
+            if (type.equals("EV_ABS") && code.equals("ABS_MT_POSITION_X"))
+                this.Xtemp = value;
 
-	public void ProcessingData(String type, String code, String value) {
-		this.type = type;
-		this.code = code;
-		this.value = value;
+            if (type.equals("EV_ABS") && code.equals("ABS_MT_POSITION_Y"))
+                this.Ytemp = value;
+        }
 
-		if ((this.type.equals("EV_ABS") && this.code.equals("ABS_MT_TRACKING_ID")) || (this.type.equals("EV_KEY") && this.code.equals("BTN_TOUCH"))) {
-			if ((this.value.equals("ffffffff")) || (this.value.equals("UP"))) {
-				if (this.Touchflag == true) {
-					this.Touchflag = false;
-
-					if ((StaticData.keyXs == null) || (StaticData.keyYs == null)) {
-						StaticData.keyXs = this.Xtemp;
-						StaticData.keyYs = this.Ytemp;
-					}
-
-					CopyScreenOperation();
-				}
-			} else {
-				InitPointXY();
-			}
-		}
-
-		if (this.Touchflag == true) {
-			if (this.type.equals("EV_ABS") && this.code.equals("ABS_MT_POSITION_X")) {
-				if (StaticData.keyXs == null) {
-					StaticData.keyXs = this.value;
-				} else {
-					StaticData.keyXe = this.value;
-				}
-			}
-
-			if (this.type.equals("EV_ABS") && this.code.equals("ABS_MT_POSITION_Y")) {
-				if (StaticData.keyYs == null) {
-					StaticData.keyYs = this.value;
-				} else {
-					StaticData.keyYe = this.value;
-				}
-			}
-		} else {
-			if (this.type.equals("EV_ABS") && this.code.equals("ABS_MT_POSITION_X"))
-				this.Xtemp = this.value;
-
-			if (this.type.equals("EV_ABS") && this.code.equals("ABS_MT_POSITION_Y"))
-				this.Ytemp = this.value;
-		}
-
-		if (this.type.equals("EV_KEY") && this.code.equals("KEY_BACK")) {
-			if (this.value.equals("UP"))
-				CopyKeyOperation(this.code);
-		}
-
-		if (this.type.equals("EV_KEY") && (this.code.equals("KEY_MENU") || this.code.equals("00fe"))) {
-			if (this.value.equals("UP"))
-				CopyKeyOperation(this.code);
-		}
-
-		if (this.type.equals("EV_KEY") && (this.code.equals("KEY_HOME") || this.code.equals("KEY_HOMEPAGE"))) {
-			if (this.value.equals("UP"))
-				CopyKeyOperation(this.code);
-		}
-	}
+        if (type.equals("EV_KEY")) {
+            if (code.equals("KEY_BACK") || (code.equals("KEY_MENU") || code.equals("00fe")) || (code.equals("KEY_HOME") || code.equals("KEY_HOMEPAGE"))
+                    || code.equals("KEY_POWER") || code.equals("KEY_VOLUMEDOWN") || code.equals("KEY_VOLUMEUP")) {
+                if (value.equals("ffffffff") || value.equals("UP")) {
+                    CopyKeyOperation(code);
+                }
+            }
+        }
+    }
 
 }

@@ -4,8 +4,9 @@ import AndroidDevices.DeviceListener;
 
 public class testmain {
 
-	public static void main(String[] args) {
-		DeviceListener DeviceListener = new DeviceListener(args[0]);
-		DeviceListener.Start();
-	}
+    public static void main(String[] args) {
+        DeviceListener DeviceListener = new DeviceListener();
+        DeviceListener.init();
+        DeviceListener.StartListening();
+    }
 }

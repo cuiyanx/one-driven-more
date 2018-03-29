@@ -1,87 +1,79 @@
 package AndroidDevices;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+
 public class StaticData {
 
-	static public String[] PhoneSNList = null;
-	static private int[] PhoneResolutionX = null;
-	static private int[] PhoneResolutionY = null;
-	static public String ListenerSN = null;
-	static public int ListenerResolutionX = 0;
-	static public int ListenerResolutionY = 0;
-	static public float ListenerRatioX = 0;
-	static public float ListenerRatioY = 0;
-	static public String keyXs = null;
-	static public String keyYs = null;
-	static public String keyXe = null;
-	static public String keyYe = null;
+    static public String[] DeviceSNList = null;
+    static public int[] DeviceResolutionX = null;
+    static public int[] DeviceResolutionY = null;
+    static public DeviceListenerThread[] DeviceListenerThread = null;
+    static public Process[] DeviceProcess = null;
+    static public BufferedWriter[] DeviceBW = null;
+    static public BufferedReader[] DeviceBR = null;
+    static public String keyWord = null;
+    static public String keyXs = null;
+    static public String keyYs = null;
+    static public String keyXe = null;
+    static public String keyYe = null;
+    private static float RatioX = 0;
+    private static float RatioY = 0;
 
-	static {
-		Getdata();
-	}
+    static {
+        Getdata();
+    }
 
-	synchronized static public void Getdata() {
-		System.out.println("Scan phones....");
-		
-		DeviceParameters DPs = new DeviceParameters();
-		PhoneSNList = DPs.GetPhoneSNList();
-		PhoneResolutionX = new int[PhoneSNList.length];
-		PhoneResolutionY = new int[PhoneSNList.length];
+    synchronized static public void Getdata() {
+        initOperationData();
+        DeviceParameters DPs = new DeviceParameters();
+        StaticData.DeviceSNList = DPs.getDeviceSNList();
+    }
 
-		for (int i = 0; i < PhoneSNList.length; i++) {
-			System.out.println("    SN[" + i + "]: " + PhoneSNList[i]);
+    public static int getDeviceCount(String SN) {
+        for (int i = 0; i < DeviceSNList.length; i++) {
+            if (SN.equals(DeviceSNList[i]))
+                return i;
+        }
 
-			int[] XYer = DPs.GetPhoneResolution(PhoneSNList[i]);
-			PhoneResolutionX[i] = XYer[0];
-			PhoneResolutionY[i] = XYer[1];
-			System.out.println("    Resolution[" + i + "]: " + XYer[0] + "*" + XYer[1]);
-			
-			int[] LWer = DPs.GetPhoneLW(PhoneSNList[i]);
-			System.out.println("    LW[" + i + "]: " + LWer[0] + "*" + LWer[1]);
-			
-			int[] Version = DPs.GetPhoneVersion(PhoneSNList[i]);
-			System.out.println("    Version[" + i + "]: " + Version[0] + "." + Version[1] + "." + Version[2] + "\n");
-		}
-	}
+        return 0;
+    }
 
-	public static int getResolutionX(String SN) {
-		for (int i = 0; i < PhoneSNList.length; i++) {
-			if (SN.equals(PhoneSNList[i])) {
-				return PhoneResolutionX[i];
-			}
-		}
-		
-		return 0 ;
-	}
+    public static void initOperationData() {
+        StaticData.keyWord = null;
+        StaticData.keyXs = null;
+        StaticData.keyYs = null;
+        StaticData.keyXe = null;
+        StaticData.keyYe = null;
+    }
 
-	public static int getResolutionY(String SN) {
-		for (int i = 0; i < PhoneSNList.length; i++) {
-			if (SN.equals(PhoneSNList[i])) {
-				return PhoneResolutionY[i];
-			}
-		}
-		
-		return 0 ;
-	}
+    public static int getResolutionX(String SN) {
+        int flag = getDeviceCount(SN);
+        return DeviceResolutionX[flag];
+    }
 
-	public static void setListenerSN(String SN) {
-		ListenerSN = SN;
-		DeviceParameters DPs = new DeviceParameters();
+    public static int getResolutionY(String SN) {
+        int flag = getDeviceCount(SN);
+        return DeviceResolutionY[flag];
+    }
 
-		for (int i = 0; i < PhoneSNList.length; i++) {
-			if (PhoneSNList[i].equals(ListenerSN)) {
-				int[] XYer = DPs.GetPhoneResolution(PhoneSNList[i]);
-				ListenerResolutionX = XYer[0];
-				ListenerResolutionY = XYer[1];
-			}
-		}
-	}
+    public static Process getProcess(String SN) {
+        int flag = getDeviceCount(SN);
+        return DeviceProcess[flag];
+    }
 
-	public static void setListenerRatioX(int x) {
-		ListenerRatioX = (float) (Math.round(((float) x / ListenerResolutionX) * 10000)) / 10000;
-	}
+    public static float getRatioX(String SN, int x) {
+        int RX = getResolutionX(SN);
+        RatioX = (float) (Math.round(((float) x / RX) * 10000)) / 10000;
 
-	public static void setListenerRatioY(int y) {
-		ListenerRatioY = (float) (Math.round(((float) y / ListenerResolutionY) * 10000)) / 10000;
-	}
+        return RatioX;
+    }
+
+    public static float getRatioY(String SN, int y) {
+        int RY = getResolutionY(SN);
+        RatioY = (float) (Math.round(((float) y / RY) * 10000)) / 10000;
+
+        return RatioY;
+    }
 
 }

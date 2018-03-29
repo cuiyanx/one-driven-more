@@ -27,8 +27,10 @@ public class DeviceListener {
             String cmdStr = "adb -s " + StaticData.DeviceSNList[i] + " shell";
             try {
                 StaticData.DeviceProcess[i] = Runtime.getRuntime().exec(cmdStr);
-                StaticData.DeviceBW[i] = new BufferedWriter(new OutputStreamWriter(StaticData.DeviceProcess[i].getOutputStream()));
-                StaticData.DeviceBR[i] = new BufferedReader(new InputStreamReader(StaticData.DeviceProcess[i].getInputStream()));
+                StaticData.DeviceBW[i] = new BufferedWriter(
+                        new OutputStreamWriter(StaticData.DeviceProcess[i].getOutputStream()));
+                StaticData.DeviceBR[i] = new BufferedReader(
+                        new InputStreamReader(StaticData.DeviceProcess[i].getInputStream()));
             } catch (Exception e) {
                 e.printStackTrace();
             }

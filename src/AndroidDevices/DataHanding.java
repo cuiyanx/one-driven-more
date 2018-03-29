@@ -65,7 +65,8 @@ public class DataHanding {
 
                         new Thread() {
                             public void run() {
-                                DeviceEvents.ScreenSwipe(count, StaticData.keyXs, StaticData.keyYs, StaticData.keyXe, StaticData.keyYe);
+                                DeviceEvents.ScreenSwipe(count, StaticData.keyXs, StaticData.keyYs, StaticData.keyXe,
+                                        StaticData.keyYe);
                             }
                         }.start();
                     }
@@ -105,7 +106,8 @@ public class DataHanding {
     }
 
     public void ProcessingData(String type, String code, String value) {
-        if ((type.equals("EV_ABS") && code.equals("ABS_MT_TRACKING_ID")) || (type.equals("EV_KEY") && code.equals("BTN_TOUCH"))) {
+        if ((type.equals("EV_ABS") && code.equals("ABS_MT_TRACKING_ID"))
+                || (type.equals("EV_KEY") && code.equals("BTN_TOUCH"))) {
             if ((value.equals("ffffffff")) || (value.equals("UP"))) {
                 if (this.Touchflag == true) {
                     this.Touchflag = false;
@@ -147,8 +149,9 @@ public class DataHanding {
         }
 
         if (type.equals("EV_KEY")) {
-            if (code.equals("KEY_BACK") || (code.equals("KEY_MENU") || code.equals("00fe")) || (code.equals("KEY_HOME") || code.equals("KEY_HOMEPAGE"))
-                    || code.equals("KEY_POWER") || code.equals("KEY_VOLUMEDOWN") || code.equals("KEY_VOLUMEUP")) {
+            if (code.equals("KEY_BACK") || (code.equals("KEY_MENU") || code.equals("00fe"))
+                    || (code.equals("KEY_HOME") || code.equals("KEY_HOMEPAGE")) || code.equals("KEY_POWER")
+                    || code.equals("KEY_VOLUMEDOWN") || code.equals("KEY_VOLUMEUP")) {
                 if (value.equals("ffffffff") || value.equals("UP")) {
                     CopyKeyOperation(code);
                 }

@@ -46,7 +46,8 @@ public class DeviceListenerThread extends Thread {
 
                 if (strCommandsArray.length > 3) {
                     if (strCommandsArray[1].equals("EV_ABS")) {
-                        if (strCommandsArray[2].equals("ABS_MT_TRACKING_ID") || strCommandsArray[2].equals("ABS_MT_POSITION_X")
+                        if (strCommandsArray[2].equals("ABS_MT_TRACKING_ID")
+                                || strCommandsArray[2].equals("ABS_MT_POSITION_X")
                                 || strCommandsArray[2].equals("ABS_MT_POSITION_Y")) {
                             type = strCommandsArray[1];
                             code = strCommandsArray[2];
@@ -55,8 +56,10 @@ public class DeviceListenerThread extends Thread {
                     } else if (strCommandsArray[1].equals("EV_KEY")) {
                         if (strCommandsArray[2].equals("BTN_TOUCH") || strCommandsArray[2].equals("KEY_BACK")
                                 || (strCommandsArray[2].equals("KEY_MENU") || strCommandsArray[2].equals("00fe"))
-                                || (strCommandsArray[2].equals("KEY_HOME") || strCommandsArray[2].equals("KEY_HOMEPAGE"))
-                                || strCommandsArray[2].equals("KEY_POWER") || strCommandsArray[2].equals("KEY_VOLUMEDOWN")
+                                || (strCommandsArray[2].equals("KEY_HOME")
+                                        || strCommandsArray[2].equals("KEY_HOMEPAGE"))
+                                || strCommandsArray[2].equals("KEY_POWER")
+                                || strCommandsArray[2].equals("KEY_VOLUMEDOWN")
                                 || strCommandsArray[2].equals("KEY_VOLUMEUP")) {
                             type = strCommandsArray[1];
                             code = strCommandsArray[2];

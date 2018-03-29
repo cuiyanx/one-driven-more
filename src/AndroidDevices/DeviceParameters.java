@@ -74,13 +74,16 @@ public class DeviceParameters {
             while ((strCommands = StaticData.DeviceBR[count].readLine()) != null) {
                 String[] strCommandsArray = strCommands.split("\\s+");
 
-                if (strCommandsArray.length > 1 && (strCommandsArray[1].startsWith("0035") || strCommandsArray[1].startsWith("0036"))) {
-                    if ((strCommandsArray[1].equals("0035")) && (strCommandsArray[5].equals("min")) && (strCommandsArray[7].equals("max"))) {
+                if (strCommandsArray.length > 1
+                        && (strCommandsArray[1].startsWith("0035") || strCommandsArray[1].startsWith("0036"))) {
+                    if ((strCommandsArray[1].equals("0035")) && (strCommandsArray[5].equals("min"))
+                            && (strCommandsArray[7].equals("max"))) {
                         String[] strArrayX = strCommandsArray[8].split("\\,");
                         XY[0] = Integer.parseInt(strArrayX[0]) + 1;
                     }
 
-                    if ((strCommandsArray[1].equals("0036")) && (strCommandsArray[5].equals("min")) && (strCommandsArray[7].equals("max"))) {
+                    if ((strCommandsArray[1].equals("0036")) && (strCommandsArray[5].equals("min"))
+                            && (strCommandsArray[7].equals("max"))) {
                         String[] strArrayY = strCommandsArray[8].split("\\,");
                         XY[1] = Integer.parseInt(strArrayY[0]) + 1;
 
